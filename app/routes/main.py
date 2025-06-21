@@ -5,24 +5,27 @@ from sklearn.metrics.pairwise import cosine_similarity
 import pickle
 import os
 
-#Setup
-st.set_page_config(
+# Setup
+st.set_page_config( 
     page_title="🎬 Movie Recommendation System",
     page_icon="🎞️",
     layout="wide",
 )
 
-#Session State 
+# Session State
 if "recommendations" not in st.session_state:
     st.session_state.recommendations = []
 
 if "watchlist" not in st.session_state:
     st.session_state.watchlist = []
 
+if "watched" not in st.session_state:
+    st.session_state.watched = []
+
 if "theme" not in st.session_state:
     st.session_state.theme = "dark"
 
-# ------------- Theme Toggle ----------
+# Theme Toggle
 theme = st.radio("🌓 Choose Theme:", ["dark", "light"], horizontal=True)
 st.session_state.theme = theme
 
@@ -106,11 +109,10 @@ st.markdown(f"""
     </style>
 """, unsafe_allow_html=True)
 
-
 st.markdown('<h1 class="title">🎬 Movie Recommendation System</h1>', unsafe_allow_html=True)
 st.markdown('<p class="subtitle">Discover your next favorite movie with our intelligent recommendation engine ✨</p>', unsafe_allow_html=True)
 
-# Load Movie Data 
+# Load Movie Data
 @st.cache_data
 def load_movie_data():
     file_path = os.path.join("artifacts", "movies_pivot.pkl")
@@ -155,19 +157,50 @@ try:
                     if movie not in st.session_state.watchlist:
                         st.session_state.watchlist.append(movie)
 
-    # Show Watchlist
-       # Show Watchlist
+    # --- Watchlist Section ---
     if st.session_state.watchlist:
         st.markdown('<h2 class="recommendations-title">🎯 Your Watchlist</h2>', unsafe_allow_html=True)
-        st.markdown('<div style="display:flex; flex-wrap: wrap;">', unsafe_allow_html=True)
         for movie in st.session_state.watchlist:
-            st.markdown(f'<div class="watchlist-chip">{movie}</div>', unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+            col1, col2 = st.columns([4, 1])
+            with col1:
+                st.markdown(f'<div class="watchlist-chip">{movie}</div>', unsafe_allow_html=True)
+            with col2:
+                if st.button(f"✅ Watched", key=f"watched_{movie}"):
+                    st.session_state.watchlist.remove(movie)
+                    if movie not in st.session_state.watched:
+                        st.session_state.watched.append(movie)
 
-        # Clear Watchlist Button
         if st.button("🗑 Clear Watchlist"):
             st.session_state.watchlist = []
 
+        # 📥 Export Watchlist CSV
+        watchlist_df = pd.DataFrame(st.session_state.watchlist, columns=["Movie"])
+        st.download_button(
+            label="📥 Download Watchlist as CSV",
+            data=watchlist_df.to_csv(index=False),
+            file_name="watchlist.csv",
+            mime="text/csv",
+        )
+
+    # --- Watched List Section ---
+    if st.session_state.watched:
+        st.markdown('<h2 class="recommendations-title">📽️ Watched Movies</h2>', unsafe_allow_html=True)
+        st.markdown('<div style="display:flex; flex-wrap: wrap;">', unsafe_allow_html=True)
+        for movie in st.session_state.watched:
+            st.markdown(f'<div class="watchlist-chip">{movie}</div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        if st.button("🗑 Clear Watched List"):
+            st.session_state.watched = []
+
+        # 📥 Export Watched List CSV
+        watched_df = pd.DataFrame(st.session_state.watched, columns=["Movie"])
+        st.download_button(
+            label="📥 Download Watched List as CSV",
+            data=watched_df.to_csv(index=False),
+            file_name="watched_list.csv",
+            mime="text/csv",
+        )
 
 except Exception as e:
     st.error(f"Error loading movie data: {str(e)}")
