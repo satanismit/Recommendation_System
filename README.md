@@ -116,14 +116,7 @@ pip install -r requirements.txt
 
 ---
 
-## ✨ Features to Add
 
-- [ ] Genre-based filtering (hybrid approach)
-- [ ] User-based recommendations
-- [ ] Web UI (Streamlit or Flask)
-- [ ] Deployment on Hugging Face or Render
-
----
 
 ## 📚 References
 
@@ -132,12 +125,4 @@ pip install -r requirements.txt
 
 ---
 
-## 👨‍💻 Author
 
-**Smit** – [GitHub](https://github.com/satanismit)
-
----
-
-## 📄 License
-
-This project is open source and free to use.
